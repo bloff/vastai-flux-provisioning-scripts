@@ -27,6 +27,7 @@ WORKFLOWS=(
 CLIP_MODELS=(
     "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/clip_l.safetensors"
     "https://huggingface.co/comfyanonymous/flux_text_encoders/resolve/main/t5xxl_fp16.safetensors"
+    
 )
 
 UNET_MODELS=(
@@ -65,6 +66,16 @@ function provisioning_start() {
     provisioning_get_files \
         "${COMFYUI_DIR}/models/clip" \
         "${CLIP_MODELS[@]}"
+
+    (cd "${COMFYUI_DIR}/models/unet"; unzip "ggufFastfluxFlux1Schnell_q40V2.zip")
+    (cd "${COMFYUI_DIR}/custom_nodes"; git clone https://github.com/city96/ComfyUI-GGUF)
+    pip install --upgrade gguf
+    (cd "${COMFYUI_DIR}/custom_nodes"; git clone https://github.com/calcuis/gguf)
+    pip install gguf-node
+    (cd "${COMFYUI_DIR}/custom_nodes"; git clone https://github.com/yolain/ComfyUI-Easy-Use)
+    (cd "${COMFYUI_DIR}/custom_nodes/ComfyUI-Easy-Use"; bash install.sh)
+    
+    
     provisioning_print_end
 }
 
@@ -167,7 +178,7 @@ function provisioning_download() {
         auth_token="$CIVITAI_TOKEN"
     fi
     if [[ -n $auth_token ]];then
-        wget --header="Authorization: Bearer $auth_token" -qnc --content-disposition --show-progress -e dotbytes="${3:-4M}" -P "$2" "$1"
+        wget --header="Authorization: Bearer $auth_token" -qnc --content-disposition --show-progress -e dotbytes="${3:-4M}" -P "$2" "$1&token=$auth_token"
     else
         wget -qnc --content-disposition --show-progress -e dotbytes="${3:-4M}" -P "$2" "$1"
     fi
